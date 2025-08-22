@@ -17,6 +17,7 @@ class Category(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
+    image = models.ImageField(upload_to='blog_images/', blank=True, null=True, help_text="Imagen principal del post")
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     categories = models.ManyToManyField("Category", related_name="posts")

@@ -281,6 +281,57 @@ body.modal-open {
     margin-top: 20px;
     max-width: 600px;
     color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+/* Estilo mejorado para enlaces de proyectos */
+.project-item a {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--accent-color), #b0b08d);
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border: 2px solid transparent;
+}
+
+.project-item a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: var(--transition-fast);
+}
+
+.project-item a:hover::before {
+    left: 100%;
+}
+
+.project-item a:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(214, 214, 173, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.project-item a i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.project-item a:hover i {
+    transform: scale(1.1) rotate(10deg);
 }
 
 /* Botones de navegación compartidos */
@@ -1160,6 +1211,125 @@ footer.small .linea-blanca {
     background: rgba(255, 255, 255, 0.15);
 }
 
+.submit-button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent-color), #b0b08d);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-light);
+}
+
+.submit-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(214, 214, 173, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .blog-categories {
+        gap: 15px;
+    }
+    
+    .category-chip {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+    
+    .post-modal-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    #modal-post-title {
+        font-size: 2rem;
+    }
+    
+    .container {
+        gap: 20px;
+    }
+    
+    .card {
+        width: 180px;
+        height: 280px;
+    }
+    
+    .about-carousel-container, .project-carousel-container {
+        width: 95%;
+        margin: 30px auto;
+    }
+    
+    .about-item, .project-item {
+        padding: 30px 20px;
+    }
+    
+    .about-item h2, .project-item h2 {
+        font-size: 1.8rem;
+    }
+    
+    .about-item img, .project-item img {
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .side h1 {
+        font-size: 50px;
+    }
+    
+    #typed-text {
+        font-size: 60px;
+    }
+    
+    .blog-container h1 {
+        font-size: 2rem;
+    }
+    
+    .blog-categories {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .about-carousel-container, .project-carousel-container {
+        width: 100%;
+        margin: 20px auto;
+    }
+    
+    .about-item, .project-item {
+        padding: 20px 15px;
+    }
+    
+    .about-item h2, .project-item h2 {
+        font-size: 1.5rem;
+    }
+    
+    .about-item img, .project-item img {
+        max-width: 250px;
+    }
+    
+    .about-navigation-buttons, .project-navigation-buttons {
+        padding: 0 15px;
+    }
+    
+    .about-navigation-buttons button, .project-navigation-buttons button {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}--accent-color);
+    box-shadow: 0 0 15px rgba(214, 214, 173, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
 .comment-form input::placeholder,
 .comment-form textarea::placeholder {
     color: var(--text-muted);
@@ -1397,128 +1567,4 @@ footer.small .linea-blanca {
     font-family: 'Poppins', sans-serif;
     transition: var(--transition-fast);
     backdrop-filter: blur(5px);
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 15px rgba(214, 214, 173, 0.3);
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.submit-button {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--accent-color), #b0b08d);
-    color: var(--primary-color);
-    border: none;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 1.1rem;
-    box-shadow: var(--shadow-light);
-}
-
-.submit-button:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 15px 30px rgba(214, 214, 173, 0.4);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .blog-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .blog-categories {
-        gap: 15px;
-    }
-    
-    .category-chip {
-        padding: 10px 20px;
-        font-size: 0.85rem;
-    }
-    
-    .post-modal-content {
-        padding: 30px 20px;
-        margin: 20px;
-    }
-    
-    #modal-post-title {
-        font-size: 2rem;
-    }
-    
-    .container {
-        gap: 20px;
-    }
-    
-    .card {
-        width: 180px;
-        height: 280px;
-    }
-    
-    .about-carousel-container, .project-carousel-container {
-        width: 95%;
-        margin: 30px auto;
-    }
-    
-    .about-item, .project-item {
-        padding: 30px 20px;
-    }
-    
-    .about-item h2, .project-item h2 {
-        font-size: 1.8rem;
-    }
-    
-    .about-item img, .project-item img {
-        max-width: 280px;
-    }
-}
-
-@media (max-width: 480px) {
-    .side h1 {
-        font-size: 50px;
-    }
-    
-    #typed-text {
-        font-size: 60px;
-    }
-    
-    .blog-container h1 {
-        font-size: 2rem;
-    }
-    
-    .blog-categories {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .about-carousel-container, .project-carousel-container {
-        width: 100%;
-        margin: 20px auto;
-    }
-    
-    .about-item, .project-item {
-        padding: 20px 15px;
-    }
-    
-    .about-item h2, .project-item h2 {
-        font-size: 1.5rem;
-    }
-    
-    .about-item img, .project-item img {
-        max-width: 250px;
-    }
-    
-    .about-navigation-buttons, .project-navigation-buttons {
-        padding: 0 15px;
-    }
-    
-    .about-navigation-buttons button, .project-navigation-buttons button {
-        padding: 10px 15px;
-        font-size: 0.9rem;
-    }
 }

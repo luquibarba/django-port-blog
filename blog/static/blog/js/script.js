@@ -332,49 +332,111 @@ document.addEventListener("DOMContentLoaded", function () {
     const toggleCommentsBtn = document.getElementById('toggle-comments-btn');
     const commentsWrapper = document.getElementById('comments-wrapper');
 
-    // Datos simulados de posts para el modal
-    const postsData = {};
-    
-    // Inicializar datos de posts
-    blogCards.forEach((card, index) => {
-        const postId = card.dataset.postId || index;
-        const title = card.querySelector('.blog-card-title')?.textContent || 'Título del Post';
-        const excerpt = card.querySelector('.blog-card-excerpt')?.textContent || 'Contenido del post...';
-        const categories = card.dataset.categories || 'general';
-        
-        postsData[postId] = {
-            title: title,
-            body: excerpt + '\n\nEste es el contenido completo del artículo. Aquí iría el texto completo del post con todos los detalles y información relevante.',
-            date: '2024-01-15',
-            categories: categories,
-            comments: []
-        };
-    });
+    let currentPostId = null;
+
+    // Función para obtener el token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Función para cargar datos del post desde el servidor
+    async function loadPostData(postId) {
+        try {
+            const response = await fetch(`/blog/ajax/post/${postId}/`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                return data;
+            } else {
+                throw new Error(data.error || 'Error al cargar el post');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al cargar los datos del post');
+            return null;
+        }
+    }
+
+    // Función para enviar comentario al servidor
+    async function submitComment(postId, author, body) {
+        try {
+            const response = await fetch('/blog/ajax/add-comment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    post_id: postId,
+                    author: author,
+                    body: body
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                return data;
+            } else {
+                throw new Error(data.error || 'Error al enviar el comentario');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al enviar el comentario: ' + error.message);
+            return null;
+        }
+    }
 
     // Evento para abrir modal de post
     blogCards.forEach(card => {
         const readMoreBtn = card.querySelector('.blog-card-link');
         if (readMoreBtn) {
-            readMoreBtn.addEventListener('click', function(event) {
+            readMoreBtn.addEventListener('click', async function(event) {
                 event.preventDefault();
                 event.stopPropagation();
                 
-                const postId = card.dataset.postId || '1';
-                const postData = postsData[postId];
+                const postId = card.dataset.postId;
+                currentPostId = postId;
                 
-                if (postData && postModal) {
+                // Mostrar loading
+                if (postModal) {
+                    postModalTitle.textContent = 'Cargando...';
+                    postModalBody.innerHTML = '<p>Cargando contenido del post...</p>';
+                    postModal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
+                
+                // Cargar datos del servidor
+                const postData = await loadPostData(postId);
+                
+                if (postData) {
                     postModalTitle.textContent = postData.title;
                     postModalMeta.innerHTML = `
                         <span><i class="fas fa-calendar"></i> ${postData.date}</span>
                         <span class="divider">|</span>
                         <span><i class="fas fa-tags"></i> Categorías: ${postData.categories}</span>
                     `;
-                    postModalBody.innerHTML = postData.body.replace(/\n/g, '<br>');
                     
-                    updateCommentsDisplay(postId);
+                    // Incluir imagen si existe
+                    let bodyContent = postData.body;
+                    if (postData.image) {
+                        bodyContent = `<img src="${postData.image}" alt="${postData.title}" style="max-width: 100%; height: auto; border-radius: 10px; margin-bottom: 20px;">` + bodyContent;
+                    }
                     
-                    postModal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
+                    postModalBody.innerHTML = bodyContent.replace(/\n/g, '<br>');
+                    
+                    updateCommentsDisplay(postData.comments);
                 }
             });
         }
@@ -408,14 +470,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Función para actualizar la visualización de comentarios
-    function updateCommentsDisplay(postId) {
-        const postData = postsData[postId];
-        if (!postData || !postModalComments) return;
+    function updateCommentsDisplay(comments = []) {
+        if (!postModalComments) return;
         
         const commentsHtml = `
             <div class="comment-form-container">
                 <h3><i class="fas fa-comment-dots"></i> Deja tu comentario:</h3>
-                <form class="comment-form" data-post-id="${postId}">
+                <form class="comment-form" id="server-comment-form">
                     <div class="form-group">
                         <label>Nombre:</label>
                         <input type="text" name="author" required placeholder="Tu nombre">
@@ -432,11 +493,11 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="comments-list-container">
                 <h3 class="comments-title">
                     <i class="fas fa-comments"></i> 
-                    Comentarios (${postData.comments.length})
+                    Comentarios (${comments.length})
                 </h3>
                 <div class="comments-list">
-                    ${postData.comments.length > 0 ? 
-                        postData.comments.map(comment => `
+                    ${comments.length > 0 ? 
+                        comments.map(comment => `
                             <div class="comment">
                                 <div class="comment-header">
                                     <p class="comment-author">
@@ -462,32 +523,39 @@ document.addEventListener("DOMContentLoaded", function () {
         
         postModalComments.innerHTML = commentsHtml;
         
-        // Agregar evento al formulario de comentarios
-        const commentForm = postModalComments.querySelector('.comment-form');
-        if (commentForm) {
-            commentForm.addEventListener('submit', function(event) {
+        // Agregar evento al formulario de comentarios del servidor
+        const serverCommentForm = document.getElementById('server-comment-form');
+        if (serverCommentForm) {
+            serverCommentForm.addEventListener('submit', async function(event) {
                 event.preventDefault();
                 
-                const formData = new FormData(commentForm);
+                const formData = new FormData(serverCommentForm);
                 const author = formData.get('author');
                 const body = formData.get('body');
-                const currentPostId = commentForm.dataset.postId;
                 
-                if (author && body && postsData[currentPostId]) {
-                    // Agregar comentario
-                    const newComment = {
-                        author: author,
-                        body: body,
-                        date: new Date().toLocaleDateString()
-                    };
+                if (author && body && currentPostId) {
+                    // Deshabilitar el botón mientras se envía
+                    const submitBtn = serverCommentForm.querySelector('.submit-comment-btn');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                    submitBtn.disabled = true;
                     
-                    postsData[currentPostId].comments.push(newComment);
+                    const result = await submitComment(currentPostId, author, body);
                     
-                    // Actualizar display
-                    updateCommentsDisplay(currentPostId);
+                    if (result && result.success) {
+                        // Recargar los datos del post para mostrar el nuevo comentario
+                        const updatedPostData = await loadPostData(currentPostId);
+                        if (updatedPostData) {
+                            updateCommentsDisplay(updatedPostData.comments);
+                        }
+                        
+                        // Mostrar mensaje de éxito
+                        alert('¡Comentario agregado exitosamente!');
+                    }
                     
-                    // Mostrar mensaje de éxito
-                    alert('¡Comentario agregado exitosamente!');
+                    // Restaurar el botón
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 }
             });
         }

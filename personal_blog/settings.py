@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os  # ← Asegúrate de que esta línea esté aquí
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,16 +29,22 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
+# Configuración para archivos media (imágenes subidas)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Asegurar que Pillow esté instalado para el manejo de imágenes
+# pip install Pillow
+
+# En INSTALLED_APPS, asegurar que esté incluido:
 INSTALLED_APPS = [
-    "blog",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'blog',  # Tu app
 ]
 
 MIDDLEWARE = [
@@ -123,3 +130,6 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

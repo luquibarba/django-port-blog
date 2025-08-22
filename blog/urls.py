@@ -1,8 +1,16 @@
-from django.urls import path
-from . import views
+# Actualizar el archivo urls.py del proyecto principal
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path("", views.blog_index, name="blog_index"),
-    path("category/<category>/", views.blog_category, name="blog_category"),
-    path("<int:pk>/", views.blog_detail, name="blog_detail"),
+    path('admin/', admin.site.urls),
+    path('blog/', include('blog.urls')),
+    path('', include('blog.urls')),  # Para que el blog sea la página principal
 ]
+
+# Servir archivos media durante el desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
