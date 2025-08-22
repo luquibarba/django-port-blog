@@ -1,472 +1,495 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // --- Lógica de navegación principal (entre secciones) ---
+    document.body.classList.add('loaded');
+
     const navDots = document.querySelectorAll('.nav-dot');
     const contentSections = document.querySelectorAll('.content-section');
     const mainContentWrapper = document.querySelector('.main-content-wrapper');
     const footer = document.querySelector('footer');
-    const logoLink = document.getElementById('logo-link');
     const codeTypewriters = document.querySelector('.code-typewriters');
 
     let currentSectionIndex = 0;
     let isTransitioning = false;
-    let touchStartY = 0;
-    let touchEndY = 0;
 
     function showSection(index) {
-        if (isTransitioning || index === currentSectionIndex) return;
+        if (isTransitioning || index === currentSectionIndex) {
+            return;
+        }
+
         isTransitioning = true;
 
         contentSections[currentSectionIndex].classList.remove('active');
         navDots[currentSectionIndex].classList.remove('active');
-        
-        setTimeout(() => {
-            currentSectionIndex = index;
-            contentSections[currentSectionIndex].classList.add('active');
-            navDots[currentSectionIndex].classList.add('active');
 
-            if (index === 0) {
-                footer.classList.remove('small');
-                if (codeTypewriters) codeTypewriters.classList.add('show-code-typewriters');
-            } else {
-                footer.classList.add('small');
-                if (codeTypewriters) codeTypewriters.classList.remove('show-code-typewriters');
+        if (index === 0) {
+            footer.classList.remove('small');
+            if (codeTypewriters) {
+                codeTypewriters.classList.add('show-code-typewriters');
             }
+        } else {
+            footer.classList.add('small');
+            if (codeTypewriters) {
+                codeTypewriters.classList.remove('show-code-typewriters');
+            }
+        }
 
-            setTimeout(() => { isTransitioning = false; }, 800);
-        }, 100);
+        currentSectionIndex = index;
+
+        contentSections[currentSectionIndex].classList.add('active');
+        navDots[currentSectionIndex].classList.add('active');
+
+        setTimeout(() => {
+            isTransitioning = false;
+        }, 800);
     }
 
     navDots.forEach((dot, index) => {
-        dot.addEventListener('click', () => showSection(index));
-        dot.addEventListener('mouseenter', () => {
-            if (!dot.classList.contains('active')) {
-                dot.style.transform = 'scale(1.2)';
-            }
-        });
-        dot.addEventListener('mouseleave', () => {
-            if (!dot.classList.contains('active')) {
-                dot.style.transform = 'scale(1)';
-            }
+        dot.addEventListener('click', () => {
+            showSection(index);
         });
     });
-
-    if (logoLink) {
-        logoLink.addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            showSection(0); 
-        });
-    }
 
     let lastScrollTime = 0;
+    const scrollThreshold = 700;
+
     mainContentWrapper.addEventListener('wheel', (event) => {
-        if (new Date().getTime() - lastScrollTime < 700) return;
-        lastScrollTime = new Date().getTime();
-        
-        if (event.deltaY > 0 && currentSectionIndex < contentSections.length - 1) {
-            showSection(currentSectionIndex + 1);
-        } else if (event.deltaY < 0 && currentSectionIndex > 0) {
-            showSection(currentSectionIndex - 1);
+        const currentTime = new Date().getTime();
+
+        if (currentTime - lastScrollTime < scrollThreshold) {
+            return;
         }
-        event.preventDefault();
-    }, { passive: false });
 
-    mainContentWrapper.addEventListener('touchstart', (event) => {
-        touchStartY = event.touches[0].clientY;
-    });
+        lastScrollTime = currentTime;
 
-    mainContentWrapper.addEventListener('touchend', (event) => {
-        touchEndY = event.changedTouches[0].clientY;
-        handleSwipe();
-    });
-
-    function handleSwipe() {
-        const swipeThreshold = 50;
-        const diff = touchStartY - touchEndY;
-
-        if (Math.abs(diff) > swipeThreshold) {
-            if (diff > 0 && currentSectionIndex < contentSections.length - 1) {
+        if (event.deltaY > 0) {
+            if (currentSectionIndex < contentSections.length - 1) {
                 showSection(currentSectionIndex + 1);
-            } else if (diff < 0 && currentSectionIndex > 0) {
+            }
+        } else {
+            if (currentSectionIndex > 0) {
                 showSection(currentSectionIndex - 1);
             }
         }
-    }
 
-    if (typeof Typed !== 'undefined') {
-        new Typed("#code-typed-text-1", { 
-            strings: ["const name = 'Lucas Barba';"], 
-            typeSpeed: 30, 
-            backSpeed: 10, 
-            backDelay: 5000, 
-            startDelay: 1000, 
-            loop: true 
-        });
-        new Typed("#code-typed-text-2", { 
-            strings: ["let skills = ['Python', 'HTML', 'CSS', 'JS'];"], 
-            typeSpeed: 30, 
-            backSpeed: 10, 
-            backDelay: 6000, 
-            startDelay: 1500, 
-            loop: true 
-        });
-        new Typed("#code-typed-text-3", { 
-            strings: ["function welcome() { console.log('Bienvenido'); }"], 
-            typeSpeed: 20, 
-            backSpeed: 10, 
-            backDelay: 7000, 
-            startDelay: 2000, 
-            loop: true 
-        });
-    }
+        event.preventDefault();
+    }, { passive: false });
 
-    function setupCarousel(containerSelector, wrapperSelector, itemSelector, prevBtnSelector, nextBtnSelector, dotSelector) {
-        const container = document.querySelector(containerSelector);
-        if (!container) return;
-
-        const wrapper = container.querySelector(wrapperSelector);
-        const items = container.querySelectorAll(itemSelector);
-        const prevBtn = container.querySelector(prevBtnSelector);
-        const nextBtn = container.querySelector(nextBtnSelector);
-        const dots = container.querySelectorAll(dotSelector);
-
-        let currentIndex = 0;
-        const totalItems = items.length;
-
-        function updateCarousel() {
-            const translateX = -currentIndex * 100;
-            wrapper.style.transform = `translateX(${translateX}%)`;
-            
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentIndex);
-            });
-        }
-
-        function nextSlide() {
-            currentIndex = (currentIndex + 1) % totalItems;
-            updateCarousel();
-        }
-
-        function prevSlide() {
-            currentIndex = (currentIndex - 1 + totalItems) % totalItems;
-            updateCarousel();
-        }
-
-        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
-        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                currentIndex = index;
-                updateCarousel();
-            });
-        });
-
-        let autoSlide = setInterval(nextSlide, 5000);
-        container.addEventListener('mouseenter', () => clearInterval(autoSlide));
-        container.addEventListener('mouseleave', () => {
-            autoSlide = setInterval(nextSlide, 5000);
-        });
-    }
-
-    setupCarousel('.about-carousel-container', '.about-wrapper', '.about-item', '#prevAbout', '#nextAbout', '.about-dot');
-    setupCarousel('.project-carousel-container', '.project-wrapper', '.project-item', '.project-arrow-dot.left', '.project-arrow-dot.right', '.project-dot');
-
-    function setupModal(triggerSelector, modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-
-        const trigger = document.querySelector(triggerSelector);
-        const closeBtn = modal.querySelector('.close-button');
-
-        const openModal = (e) => {
-            e.preventDefault();
-            modal.classList.add('show');
-            document.body.classList.add('modal-open');
-            
-            setTimeout(() => {
-                modal.style.backdropFilter = 'blur(15px)';
-            }, 100);
-        };
-
-        const closeModal = () => {
-            modal.classList.remove('show');
-            document.body.classList.remove('modal-open');
-            modal.style.backdropFilter = 'blur(10px)';
-        };
-
-        if (trigger) trigger.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('show')) {
-                closeModal();
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+            if (currentSectionIndex < contentSections.length - 1) {
+                showSection(currentSectionIndex + 1);
+                event.preventDefault();
             }
-        });
-    }
-
-    setupModal('.wrapper ul li.google a', 'contactModal');
-
-    const categoryContainer = document.querySelector('.blog-categories');
-    const blogCards = document.querySelectorAll('.blog-card');
-
-    if (categoryContainer && blogCards.length > 0) {
-        categoryContainer.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = e.target;
-            if (!target.classList.contains('category-chip')) return;
-
-            const currentActive = categoryContainer.querySelector('.active');
-            if (currentActive) currentActive.classList.remove('active');
-            target.classList.add('active');
-
-            const filter = target.dataset.filter;
-            filterBlogPosts(filter);
-        });
-    }
-
-    function filterBlogPosts(filter) {
-        blogCards.forEach((card, index) => {
-            const cardCategories = card.dataset.categories || '';
-            const shouldBeVisible = (filter === 'all' || cardCategories.includes(filter));
-
-            if (shouldBeVisible) {
-                setTimeout(() => {
-                    card.classList.remove('hidden');
-                    card.style.display = '';
-                }, index * 100);
-            } else {
-                card.classList.add('hidden');
-                setTimeout(() => {
-                    if (card.classList.contains('hidden')) {
-                        card.style.display = 'none';
-                    }
-                }, 400);
+        } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+            if (currentSectionIndex > 0) {
+                showSection(currentSectionIndex - 1);
+                event.preventDefault();
             }
-        });
-    }
-
-    const postModal = document.getElementById('postModal');
-    const blogGrid = document.querySelector('.blog-grid');
-
-    if (postModal && blogGrid) {
-        const postModalCloseBtn = postModal.querySelector('.close-button');
-
-        blogGrid.addEventListener('click', (e) => {
-            const card = e.target.closest('.blog-card');
-            if (!card) return;
-
-            const title = card.querySelector('.blog-card-title').textContent;
-            const metaContent = card.querySelector('.post-meta-content').innerHTML;
-            const bodyContent = card.querySelector('.post-body-content').innerHTML;
-            const commentsContent = card.querySelector('.post-comments-content').innerHTML;
-
-            postModal.querySelector('#modal-post-title').textContent = title;
-            postModal.querySelector('#modal-post-meta').innerHTML = metaContent;
-            postModal.querySelector('#modal-post-body').innerHTML = bodyContent;
-            postModal.querySelector('#modal-post-comments').innerHTML = commentsContent;
-
-            postModal.classList.add('show');
-            document.body.classList.add('modal-open');
-
-            const toggleBtn = postModal.querySelector('#toggle-comments-btn');
-            const commentsWrapper = postModal.querySelector('#comments-wrapper');
-            
-            if (toggleBtn && commentsWrapper) {
-                commentsWrapper.classList.remove('visible');
-                toggleBtn.innerHTML = '<i class="fas fa-comments"></i> Ver Comentarios';
-                
-                toggleBtn.onclick = () => {
-                    commentsWrapper.classList.toggle('visible');
-                    if (commentsWrapper.classList.contains('visible')) {
-                        toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar Comentarios';
-                    } else {
-                        toggleBtn.innerHTML = '<i class="fas fa-comments"></i> Ver Comentarios';
-                    }
-                };
-            }
-
-            setTimeout(() => {
-                postModal.style.backdropFilter = 'blur(15px)';
-            }, 100);
-        });
-
-        const closePostModal = () => {
-            postModal.classList.remove('show');
-            document.body.classList.remove('modal-open');
-            postModal.style.backdropFilter = 'blur(10px)';
-        };
-
-        if (postModalCloseBtn) postModalCloseBtn.addEventListener('click', closePostModal);
-        postModal.addEventListener('click', (e) => {
-            if (e.target === postModal) closePostModal();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && postModal.classList.contains('show')) {
-                closePostModal();
-            }
-        });
-    }
-
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const submitBtn = contactForm.querySelector('.submit-button');
-            const originalText = submitBtn.textContent;
-            
-            submitBtn.textContent = 'Enviando...';
-            submitBtn.disabled = true;
-            
-            setTimeout(() => {
-                submitBtn.textContent = 'Enviado ✓';
-                submitBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-                
-                setTimeout(() => {
-                    contactForm.reset();
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                    submitBtn.style.background = '';
-                    
-                    const modal = document.getElementById('contactModal');
-                    if (modal) {
-                        modal.classList.remove('show');
-                        document.body.classList.remove('modal-open');
-                    }
-                }, 2000);
-            }, 1500);
-        });
-    }
-
-    function addParallaxEffect() {
-        const cards = document.querySelectorAll('.card, .blog-card');
-        
-        cards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = (y - centerY) / 10;
-                const rotateY = (centerX - x) / 10;
-                
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.05)`;
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = '';
-            });
-        });
-    }
-
-    function addScrollAnimations() {
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        const animatedElements = document.querySelectorAll('.blog-card, .card, .category-chip');
-        animatedElements.forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-    }
-
-    function addCategoryChipEffects() {
-        const chips = document.querySelectorAll('.category-chip');
-        
-        chips.forEach(chip => {
-            chip.addEventListener('mouseenter', () => {
-                chips.forEach(otherChip => {
-                    if (otherChip !== chip && !otherChip.classList.contains('active')) {
-                        otherChip.style.opacity = '0.5';
-                        otherChip.style.transform = 'scale(0.95)';
-                    }
-                });
-            });
-            
-            chip.addEventListener('mouseleave', () => {
-                chips.forEach(otherChip => {
-                    if (otherChip !== chip) {
-                        otherChip.style.opacity = '';
-                        otherChip.style.transform = '';
-                    }
-                });
-            });
-        });
-    }
-
-    function addBlogCardAnimations() {
-        const blogCards = document.querySelectorAll('.blog-card');
-        
-        blogCards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            
-            const image = card.querySelector('.blog-card-image');
-            const content = card.querySelector('.blog-card-content');
-            
-            if (image && content) {
-                card.addEventListener('mouseenter', () => {
-                    image.style.transform = 'scale(1.1)';
-                    content.style.transform = 'translateY(-5px)';
-                });
-                
-                card.addEventListener('mouseleave', () => {
-                    image.style.transform = 'scale(1)';
-                    content.style.transform = 'translateY(0)';
-                });
-            }
-        });
-    }
-
-    function addLoadingAnimations() {
-        const elements = document.querySelectorAll('.content-section, .nav-dot, .main-header');
-        elements.forEach((el, index) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
-    }
-
-    setTimeout(() => {
-        addParallaxEffect();
-        addScrollAnimations();
-        addCategoryChipEffects();
-        addBlogCardAnimations();
-        addLoadingAnimations();
-    }, 500);
-
-    showSection(0);
-    
-    window.addEventListener('resize', () => {
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            document.body.style.fontSize = '14px';
-        } else {
-            document.body.style.fontSize = '';
         }
     });
+
+    showSection(0);
+
+    // --- Lógica para el carrusel de "Sobre mi" (section2) ---
+    const aboutWrapper = document.querySelector('.about-wrapper');
+    const aboutItems = document.querySelectorAll('.about-item');
+    const prevAboutBtn = document.getElementById('prevAbout');
+    const nextAboutBtn = document.getElementById('nextAbout');
+    const aboutDots = document.querySelectorAll('.about-dot');
+
+    let currentAboutIndex = 0;
+
+    function showAboutSlide(index) {
+        if (aboutItems.length === 0) return;
+
+        // Normalizar índice
+        if (index < 0) {
+            currentAboutIndex = aboutItems.length - 1;
+        } else if (index >= aboutItems.length) {
+            currentAboutIndex = 0;
+        } else {
+            currentAboutIndex = index;
+        }
+
+        // Calcular el offset
+        const aboutWidth = aboutItems[0] ? aboutItems[0].offsetWidth : 0;
+        const offset = -currentAboutIndex * aboutWidth;
+        
+        if (aboutWrapper) {
+            aboutWrapper.style.transform = `translateX(${offset}px)`;
+        }
+
+        // Actualizar dots
+        aboutDots.forEach((dot, idx) => {
+            if (idx === currentAboutIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    if (prevAboutBtn) {
+        prevAboutBtn.addEventListener('click', () => {
+            showAboutSlide(currentAboutIndex - 1);
+        });
+    }
+
+    if (nextAboutBtn) {
+        nextAboutBtn.addEventListener('click', () => {
+            showAboutSlide(currentAboutIndex + 1);
+        });
+    }
+
+    aboutDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            showAboutSlide(index);
+        });
+    });
+
+    if (aboutItems.length > 0) {
+        showAboutSlide(0);
+
+        window.addEventListener('resize', () => {
+            showAboutSlide(currentAboutIndex);
+        });
+    }
+
+    // --- Lógica para el carrusel de "Proyectos Destacados" (section4) ---
+    const projectWrapper = document.querySelector('.project-wrapper');
+    const projectItems = document.querySelectorAll('.project-item');
+    const prevProjectBtn = document.getElementById('prevProject');
+    const nextProjectBtn = document.getElementById('nextProject');
+    const projectDots = document.querySelectorAll('.project-dot');
+
+    let currentProjectIndex = 0;
+
+    function showProject(index) {
+        if (projectItems.length === 0) return;
+
+        // Normalizar índice
+        if (index < 0) {
+            currentProjectIndex = projectItems.length - 1;
+        } else if (index >= projectItems.length) {
+            currentProjectIndex = 0;
+        } else {
+            currentProjectIndex = index;
+        }
+
+        // Calcular el offset
+        const projectItemWidth = projectItems[0] ? projectItems[0].offsetWidth : 0;
+        const offset = -currentProjectIndex * projectItemWidth;
+        
+        if (projectWrapper) {
+            projectWrapper.style.transform = `translateX(${offset}px)`;
+        }
+
+        // Actualizar dots
+        projectDots.forEach((dot, idx) => {
+            if (idx === currentProjectIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    if (prevProjectBtn) {
+        prevProjectBtn.addEventListener('click', () => {
+            showProject(currentProjectIndex - 1);
+        });
+    }
+
+    if (nextProjectBtn) {
+        nextProjectBtn.addEventListener('click', () => {
+            showProject(currentProjectIndex + 1);
+        });
+    }
+
+    projectDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            showProject(index);
+        });
+    });
+
+    if (projectItems.length > 0) {
+        showProject(0);
+
+        window.addEventListener('resize', () => {
+            showProject(currentProjectIndex);
+        });
+    }
+
+    // --- Lógica para el logoLink (desplazamiento al inicio) ---
+    const logoLink = document.getElementById('logo-link');
+
+    if (logoLink) {
+        logoLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            showSection(0);
+        });
+    }
+
+    // --- Lógica para el Modal de Contacto ---
+    const googleButton = document.querySelector('.wrapper ul li.google a');
+    const contactModal = document.getElementById('contactModal');
+    const closeButtons = document.querySelectorAll('.close-button');
+
+    if (googleButton && contactModal) {
+        googleButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            contactModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Cerrar cualquier modal abierto
+            const modals = document.querySelectorAll('.modal-backdrop');
+            modals.forEach(modal => {
+                modal.classList.remove('show');
+            });
+            document.body.style.overflow = '';
+        });
+    });
+
+    // Cerrar modal haciendo clic fuera
+    const modals = document.querySelectorAll('.modal-backdrop');
+    modals.forEach(modal => {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+
+    // --- Lógica del formulario de contacto ---
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(contactForm);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const message = formData.get('message');
+            
+            // Validación básica
+            if (!name || !email || !message) {
+                alert('Por favor, completa todos los campos.');
+                return;
+            }
+            
+            alert('¡Formulario enviado correctamente! Gracias por tu mensaje, ' + name + '.');
+            contactModal.classList.remove('show');
+            document.body.style.overflow = '';
+            contactForm.reset();
+        });
+    }
+
+    // --- Lógica para filtros de categorías del blog (section5) ---
+    const categoryChips = document.querySelectorAll('.category-chip');
+    const blogCards = document.querySelectorAll('.blog-card');
+
+    categoryChips.forEach(chip => {
+        chip.addEventListener('click', function(event) {
+            event.preventDefault();
+            
+            // Remover active de todos los chips
+            categoryChips.forEach(c => c.classList.remove('active'));
+            
+            // Agregar active al chip clickeado
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            
+            blogCards.forEach(card => {
+                const cardCategories = card.dataset.categories || '';
+                
+                if (filter === 'all' || cardCategories.includes(filter)) {
+                    card.classList.remove('hidden');
+                    card.style.display = 'block';
+                } else {
+                    card.classList.add('hidden');
+                    setTimeout(() => {
+                        if (card.classList.contains('hidden')) {
+                            card.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            });
+        });
+    });
+
+    // --- Lógica para el modal de posts del blog ---
+    const postModal = document.getElementById('postModal');
+    const postModalTitle = document.getElementById('modal-post-title');
+    const postModalMeta = document.getElementById('modal-post-meta');
+    const postModalBody = document.getElementById('modal-post-body');
+    const postModalComments = document.getElementById('modal-post-comments');
+    const toggleCommentsBtn = document.getElementById('toggle-comments-btn');
+    const commentsWrapper = document.getElementById('comments-wrapper');
+
+    // Datos simulados de posts para el modal
+    const postsData = {};
+    
+    // Inicializar datos de posts
+    blogCards.forEach((card, index) => {
+        const postId = card.dataset.postId || index;
+        const title = card.querySelector('.blog-card-title')?.textContent || 'Título del Post';
+        const excerpt = card.querySelector('.blog-card-excerpt')?.textContent || 'Contenido del post...';
+        const categories = card.dataset.categories || 'general';
+        
+        postsData[postId] = {
+            title: title,
+            body: excerpt + '\n\nEste es el contenido completo del artículo. Aquí iría el texto completo del post con todos los detalles y información relevante.',
+            date: '2024-01-15',
+            categories: categories,
+            comments: []
+        };
+    });
+
+    // Evento para abrir modal de post
+    blogCards.forEach(card => {
+        const readMoreBtn = card.querySelector('.blog-card-link');
+        if (readMoreBtn) {
+            readMoreBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const postId = card.dataset.postId || '1';
+                const postData = postsData[postId];
+                
+                if (postData && postModal) {
+                    postModalTitle.textContent = postData.title;
+                    postModalMeta.innerHTML = `
+                        <span><i class="fas fa-calendar"></i> ${postData.date}</span>
+                        <span class="divider">|</span>
+                        <span><i class="fas fa-tags"></i> Categorías: ${postData.categories}</span>
+                    `;
+                    postModalBody.innerHTML = postData.body.replace(/\n/g, '<br>');
+                    
+                    updateCommentsDisplay(postId);
+                    
+                    postModal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        }
+        
+        // También permitir click en toda la card
+        card.addEventListener('click', function(event) {
+            if (!event.target.closest('.blog-card-link')) {
+                const readMoreBtn = card.querySelector('.blog-card-link');
+                if (readMoreBtn) {
+                    readMoreBtn.click();
+                }
+            }
+        });
+    });
+
+    // Toggle para mostrar/ocultar comentarios
+    if (toggleCommentsBtn && commentsWrapper) {
+        toggleCommentsBtn.addEventListener('click', function() {
+            const isVisible = commentsWrapper.classList.contains('visible');
+            
+            if (isVisible) {
+                commentsWrapper.classList.remove('visible');
+                this.innerHTML = '<i class="fas fa-comments"></i> Ver Comentarios';
+                this.setAttribute('aria-expanded', 'false');
+            } else {
+                commentsWrapper.classList.add('visible');
+                this.innerHTML = '<i class="fas fa-comments"></i> Ocultar Comentarios';
+                this.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+
+    // Función para actualizar la visualización de comentarios
+    function updateCommentsDisplay(postId) {
+        const postData = postsData[postId];
+        if (!postData || !postModalComments) return;
+        
+        const commentsHtml = `
+            <div class="comment-form-container">
+                <h3><i class="fas fa-comment-dots"></i> Deja tu comentario:</h3>
+                <form class="comment-form" data-post-id="${postId}">
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" name="author" required placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Comentario:</label>
+                        <textarea name="body" rows="4" required placeholder="Escribe tu comentario aquí..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-comment-btn">
+                        <i class="fas fa-paper-plane"></i> Enviar Comentario
+                    </button>
+                </form>
+            </div>
+            <div class="comments-list-container">
+                <h3 class="comments-title">
+                    <i class="fas fa-comments"></i> 
+                    Comentarios (${postData.comments.length})
+                </h3>
+                <div class="comments-list">
+                    ${postData.comments.length > 0 ? 
+                        postData.comments.map(comment => `
+                            <div class="comment">
+                                <div class="comment-header">
+                                    <p class="comment-author">
+                                        <i class="fas fa-user"></i>
+                                        <strong>${comment.author}</strong>
+                                    </p>
+                                    <span class="comment-date">
+                                        <i class="fas fa-clock"></i>
+                                        ${comment.date}
+                                    </span>
+                                </div>
+                                <p class="comment-body">${comment.body}</p>
+                            </div>
+                        `).join('') :
+                        `<div class="no-comments">
+                            <i class="fas fa-comment-slash"></i>
+                            <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
+                        </div>`
+                    }
+                </div>
+            </div>
+        `;
+        
+        postModalComments.innerHTML = commentsHtml;
+        
+        // Agregar evento al formulario de comentarios
+        const commentForm = postModalComments.querySelector('.comment-form');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const formData = new FormData(commentForm);
+                const author = formData.get('author');
+                const body = formData.get('body');
+                const currentPostId = commentForm.dataset.postId;
+                
+                if (author && body && postsData[currentPostId]) {
+                    // Agregar comentario
+                    const newComment = {
+                        author: author,
+                        body: body,
+                        date: new Date().toLocaleDateString()
+                    };
+                    
+                    postsData[currentPostId].comments.push(newComment);
+                    
+                    // Actualizar display
+                    updateCommentsDisplay(currentPostId);
+                    
+                    // Mostrar mensaje de éxito
+                    alert('¡Comentario agregado exitosamente!');
+                }
+            });
+        }
+    }
 });

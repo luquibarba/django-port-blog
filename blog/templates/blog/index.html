@@ -9,9 +9,6 @@
   <link rel="icon" type="image/x-icon" href="{% static 'blog/logo/favicon.ico' %}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <meta name="description" content="Portafolio de Lucas Barba - Desarrollador Front-end especializado en Python, HTML, CSS y JavaScript">
-  <meta name="keywords" content="desarrollador, frontend, python, html, css, javascript, portafolio">
-  <meta name="author" content="Lucas Barba">
 </head>
 <body>
 
@@ -25,17 +22,11 @@
   <ul>
     <li class="nav-dot active" data-section="section1" aria-label="Ir a inicio" role="button" tabindex="0"></li>
     <li class="nav-dot" data-section="section2" aria-label="Ir a sobre mí" role="button" tabindex="0"></li>
-<li class="nav-dot" data-section="section3" aria-label="Ir a habilidades" role="button" tabindex="0"></li>
+    <li class="nav-dot" data-section="section3" aria-label="Ir a habilidades" role="button" tabindex="0"></li>
     <li class="nav-dot" data-section="section4" aria-label="Ir a proyectos" role="button" tabindex="0"></li>
     <li class="nav-dot" data-section="section5" aria-label="Ir a blog" role="button" tabindex="0"></li>
   </ul>
 </nav>
-
-<div class="code-typewriters">
-  <div class="code-line" style="top: 15%; right: 8%;"><span id="code-typed-text-1"></span></div>
-  <div class="code-line" style="top: 30%; right: 3%;"><span id="code-typed-text-2"></span></div>
-  <div class="code-line" style="top: 45%; right: 10%;"><span id="code-typed-text-3"></span></div>
-</div>
 
 <div class="main-content-wrapper">
   <section id="section1" class="content-section active">
@@ -69,7 +60,7 @@
         </div>
         <div class="about-item" id="about-slide3">
           <h2>Metas y Aspiraciones</h2>
-          <img src="{% static 'blog/logo/p3.png' %}" alt="Imagen representativa de metas y aspiraciones" loading="lazy">
+          <img src="{% static 'blog/logo/p3.jpg' %}" alt="Imagen representativa de metas y aspiraciones" loading="lazy">
           <p>Mi objetivo a corto plazo es dominar el desarrollo web front-end y seguir aprendiendo constantemente. Sin embargo considero sumamente importante saber back-end como perfil de programador completo.</p>
         </div>
       </div>
@@ -157,7 +148,7 @@
       <div class="project-wrapper">
         <div class="project-item" id="project1">
           <h2>Portafolio Personal</h2>
-          <img src="{% static 'blog/logo/proyecto1.png' %}" alt="Captura del proyecto de portafolio" loading="lazy" style="max-width: 400px; border-radius: 10px; margin: 20px 0;">
+
           <p>Mi primer proyecto de portafolio web completo desarrollado con HTML5, CSS3 y JavaScript vanilla. Incluye diseño responsive, animaciones fluidas y navegación intuitiva.</p>
           <a href="https://github.com/luquibarba/Mis-trabajos/tree/main/HTML%20-%20CSS%20-%20JS/Portfolio%20-%20Lucas%20Ezequiel%20Barba/" target="_blank" rel="noopener noreferrer" aria-label="Ver proyecto de portafolio en GitHub">
             <i class="fab fa-github"></i> Ver Proyecto
@@ -180,18 +171,19 @@
           </a>
         </div>
       </div>
-      <div class="project-arrow-dots-navigation">
-        <span class="project-arrow-dot left" data-direction="prev" aria-label="Proyecto anterior" role="button" tabindex="0">
-          <i class="fas fa-chevron-left"></i>
-        </span>
-        <div class="project-dots-indicators">
-          <span class="project-dot active" data-project="project1" aria-label="Ir a proyecto 1" role="button" tabindex="0"></span>
-          <span class="project-dot" data-project="project2" aria-label="Ir a proyecto 2" role="button" tabindex="0"></span>
-          <span class="project-dot" data-project="project3" aria-label="Ir a proyecto 3" role="button" tabindex="0"></span>
-        </div>
-        <span class="project-arrow-dot right" data-direction="next" aria-label="Proyecto siguiente" role="button" tabindex="0">
-          <i class="fas fa-chevron-right"></i>
-        </span>
+      
+      <div class="project-navigation-buttons">
+        <button id="prevProject" aria-label="Proyecto anterior">
+          <i class="fas fa-chevron-left"></i> Anterior
+        </button>
+        <button id="nextProject" aria-label="Proyecto siguiente">
+          Siguiente <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div class="project-dots-navigation">
+        <span class="project-dot active" aria-label="Ir a proyecto 1" role="button" tabindex="0"></span>
+        <span class="project-dot" aria-label="Ir a proyecto 2" role="button" tabindex="0"></span>
+        <span class="project-dot" aria-label="Ir a proyecto 3" role="button" tabindex="0"></span>
       </div>
     </div>
   </section>
@@ -231,66 +223,6 @@
             <span class="blog-card-link" role="button">
               <i class="fas fa-book-open"></i> Leer Más
             </span>
-          </div>
-          <div class="post-full-content" style="display: none;">
-            <div class="post-meta-content">
-              <span><i class="fas fa-calendar"></i> {{ post.created_on.date }}</span>
-              <span class="divider">|</span>
-              <span>
-                <i class="fas fa-tags"></i> Categorías:
-                {% for category in post.categories.all %}
-                <a href="#" class="category-link">{{ category.name }}</a>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-              </span>
-            </div>
-            <div class="post-body-content">{{ post.body|linebreaks }}</div>
-            <div class="post-comments-content">
-              <div class="comment-form-container">
-                <h3><i class="fas fa-comment-dots"></i> Deja tu comentario:</h3>
-                <form action="{% url 'blog_detail' post.pk %}" method="post" class="comment-form">
-                  {% csrf_token %}
-                  <div class="form-group">
-                    <label for="author_{{ post.pk }}">Nombre:</label>
-                    {{ form.author }}
-                  </div>
-                  <div class="form-group">
-                    <label for="body_{{ post.pk }}">Comentario:</label>
-                    {{ form.body }}
-                  </div>
-                  <button type="submit" class="submit-comment-btn">
-                    <i class="fas fa-paper-plane"></i> Enviar Comentario
-                  </button>
-                </form>
-              </div>
-              <div class="comments-list-container">
-                <h3 class="comments-title">
-                  <i class="fas fa-comments"></i> 
-                  Comentarios ({{ post.comments.all|length }})
-                </h3>
-                <div class="comments-list">
-                  {% for comment in post.comments.all %}
-                    <div class="comment">
-                      <div class="comment-header">
-                        <p class="comment-author">
-                          <i class="fas fa-user"></i>
-                          <strong>{{ comment.author }}</strong>
-                        </p>
-                        <span class="comment-date">
-                          <i class="fas fa-clock"></i>
-                          {{ comment.created_on.date }}
-                        </span>
-                      </div>
-                      <p class="comment-body">{{ comment.body|linebreaks }}</p>
-                    </div>
-                  {% empty %}
-                    <div class="no-comments">
-                      <i class="fas fa-comment-slash"></i>
-                      <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
           </div>
         </article>
         {% empty %}
