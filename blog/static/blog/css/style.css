@@ -406,6 +406,17 @@ body.modal-open {
     border-color: var(--accent-color);
 }
 
+#section4 h1{
+    font-family: 'Horizon', sans-serif;
+    font-weight: 700;
+    font-size: 3rem;
+    margin-bottom: 50px;
+    color: #ffffff;
+    text-align: center;
+    position: relative;
+    letter-spacing: -1px;
+}
+
 #section3 h1 {
     font-family: 'Horizon', sans-serif;
     font-weight: 700;
